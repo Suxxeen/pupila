@@ -8,25 +8,25 @@ Pupila es solo para **Windows 11 de 64 bits**. Los cambios para Windows 10 todav
 
 Necesitas el [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
-1. Compila:
+1. Entra a la carpeta `Pupila` (dentro del repositorio) y compila:
 
    ```bash
    dotnet build -c Release
    ```
 
-2. El ejecutable queda en `bin\Release\net10.0-windows10.0.19041.0\Pupila.exe`. Ejecútalo desde ahí.
+2. El ejecutable queda en `Pupila\bin\Release\net10.0-windows10.0.19041.0\Pupila.exe`. Ejecútalo desde ahí.
 
 Solo puede correr una copia de Pupila a la vez. Si ya hay una abierta, la nueva se cierra sola.
 
 ## Publicar
 
-Para generar un solo ejecutable autocontenido, en la carpeta `publish\`:
+Para generar un solo ejecutable autocontenido, en la carpeta `Pupila\publish\`:
 
 ```bash
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
 ```
 
-Para el instalador, instala [Inno Setup 6](https://jrsoftware.org/isinfo.php), publica primero con el comando de arriba y luego compila `instalador\pupila.iss`. El instalador queda en `release\`.
+Para el instalador, instala [Inno Setup 6](https://jrsoftware.org/isinfo.php), publica primero con el comando de arriba y luego compila `Pupila\instalador\pupila.iss`. El instalador queda en `Pupila\release\`.
 
 ## Reglas del proyecto
 

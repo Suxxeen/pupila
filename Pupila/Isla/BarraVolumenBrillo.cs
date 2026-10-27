@@ -57,11 +57,6 @@ public static class BarraVolumenBrillo
         Cambiado?.Invoke(llegoAlTope);
     }
 
-    /// <summary>True si el valor actual está en 0% o 100% (la barra ya no se puede mover).</summary>
-    public static bool EnLimite
-    {
-        get { lock (_cerrojo) return _enExtremo; }
-    }
 
     /// <summary>Se presionó una tecla de volumen: si ya estaba en el tope, la isla igual reacciona.</summary>
     public static void TeclaVolumen()

@@ -7,7 +7,6 @@ Una isla dinámica para Windows 11. Pasa el mouse por arriba de la pantalla y ap
 ## Funciones
 
 - **Reposo:** hora, clima, batería y una mascota de ojos que parpadea, se duerme, saluda y mira alrededor.
-- **Emociones:** la mascota puede mostrar enojo, tristeza y ojos en X.
 - **Saludo de arranque:** una línea de luz recorre el borde superior y aparece "Bienvenido" antes de mostrar el reloj.
 - **Reproductor:** muestra la canción que suena, con portada difuminada, barra de progreso, controles y botones de volumen.
 - **Espectro:** mientras suena música, la isla muestra barras que siguen el audio.
@@ -57,7 +56,7 @@ Esta sección describe lo que el programa hace de verdad. Si algo cambia en el c
 
 **Pantalla bajo la isla.** Para esconder la isla cuando hay una pestaña o una página debajo, Pupila lee la estructura de la ventana activa (solo lectura). No cambia nada, no hace clic y no guarda nada.
 
-**Batería.** Lee el porcentaje y si el equipo está conectado al cargador.
+**Batería.** Consulta el porcentaje y si el equipo está conectado al cargador cada 30 segundos, y también cuando Windows avisa que cambió la corriente.
 
 **Archivos.** Pupila guarda solo dos scripts de PowerShell en `%APPDATA%\Pupila`: `avisos.ps1` y `ubicacion.ps1`. No hay archivos de configuración ni registros.
 
@@ -69,7 +68,7 @@ Esta sección describe lo que el programa hace de verdad. Si algo cambia en el c
 
 Necesitas el [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
-Para compilar y probar:
+El proyecto está en la carpeta `Pupila` de este repositorio. Entra ahí y compila y prueba con:
 
 ```bash
 dotnet build -c Release
@@ -81,9 +80,9 @@ Para generar un solo ejecutable autocontenido:
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
 ```
 
-Para crear el instalador, instala [Inno Setup 6](https://jrsoftware.org/isinfo.php), genera primero el ejecutable con el comando anterior y luego compila `instalador/pupila.iss`. El instalador queda en `release/`.
+Para crear el instalador, instala [Inno Setup 6](https://jrsoftware.org/isinfo.php), genera primero el ejecutable con el comando anterior y luego compila `instalador/pupila.iss`. El instalador queda en `release/`, dentro de la carpeta `Pupila`.
 
-Más detalles para quien quiera colaborar: [CONTRIBUTING.md](CONTRIBUTING.md) y [documentacion/COMO-FUNCIONA.md](documentacion/COMO-FUNCIONA.md).
+Más detalles para quien quiera colaborar: [CONTRIBUTING.md](CONTRIBUTING.md) y [Pupila/documentacion/COMO-FUNCIONA.md](Pupila/documentacion/COMO-FUNCIONA.md).
 
 ## Limitaciones
 
@@ -103,5 +102,5 @@ Pupila se hizo con ayuda de IA (Claude, de Anthropic) bajo la dirección de su a
 
 ## Créditos
 
-- Iconos del clima: [Phosphor Icons](https://phosphoricons.com/), licencia MIT (ver `Recursos/iconos/PHOSPHOR-LICENSE.txt`).
+- Iconos del clima: [Phosphor Icons](https://phosphoricons.com/), licencia MIT (ver `Pupila/Recursos/iconos/PHOSPHOR-LICENSE.txt`).
 - Audio: [NAudio](https://github.com/naudio/NAudio), licencia MIT.

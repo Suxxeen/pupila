@@ -155,7 +155,6 @@ public partial class VentanaIsla : Window
 
         // Ojos, gestos, escenas, sueño y carga: los llevan sus módulos.
         Mascota.Update(ahora, dt, Nativo.IdleSeconds());
-        Reacciones.Revisar(ahora);
         IndicadorBloqueo.Revisar(ahora);
         ContenidoReposo.Update(ahora, dt);
 

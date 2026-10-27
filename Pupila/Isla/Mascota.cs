@@ -50,9 +50,6 @@ public static class Mascota
         },
     });
 
-    // Trazo de la expresión "x".
-    static readonly Pen XPen = Frozen(new Pen(Paleta.White, 2.6) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round });
-
     // Trazo congelado para los ojos cerrados (arco).
     static readonly Pen ArcEyePen = Frozen(new Pen(Paleta.White, 2) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round });
 
@@ -90,8 +87,6 @@ public static class Mascota
     /// <summary>True al arrancar, mientras la pastilla se expande vacía y todavía no empieza el saludo.</summary>
     public static bool EsperandoSaludo { get; set; }
     static double _entrada;
-    static string _expresion = "";
-    static double _expresionHasta;
     static readonly Random Rng = new();
 
     /// <summary>True cuando la mascota duerme (sin uso prolongado).</summary>
@@ -286,21 +281,6 @@ public static class Mascota
         _eyesMix = 0;
     }
 
-    /// <summary>Cambia los ojos por una expresión ("x", "enojado", "triste") unos segundos.</summary>
-    public static void Expresion(string nombre, double seconds = 2.5)
-    {
-        if (EstadoIsla.ArranqueActivo) return;
-        _expresion = nombre;
-        _expresionHasta = EstadoIsla.Now + seconds;
-        MostrarOjos(seconds + 1);
-    }
-
-    /// <summary>Muestra los ojos unos segundos, como al pasar el mouse.</summary>
-    public static void MostrarOjos(double seconds = 8)
-    {
-        _eyesHoverUntil = EstadoIsla.Now + seconds;
-    }
-
     /// <summary>Empieza el saludo de arranque: los ojos aparecen fuera de plano, se enfocan y saludan.</summary>
     public static void EmpezarSaludo()
     {
@@ -371,11 +351,7 @@ public static class Mascota
         for (int side = -1; side <= 1; side += 2)
         {
             double ex = cx + side * EYE_SPACING + _gaze * GAZE_RANGE_PX + swayX + _lean * 2.5;
-            if (now < _expresionHasta)
-            {
-                DrawExpresion(dc, ex, cy, -side);
-            }
-            else if (_sleeping)
+            if (_sleeping)
             {
                 DrawArcEye(dc, ex, cy, 4);
             }
@@ -394,46 +370,6 @@ public static class Mascota
         }
 
         if (_sleeping) DrawZzz(dc, cx, cy, now);
-    }
-
-    // Expresiones de anime: cambian la forma de los ojos un momento. innerDir = 1 si la parte de dentro está a la derecha.
-    static void DrawExpresion(DrawingContext dc, double ex, double cy, int innerDir)
-    {
-        switch (_expresion)
-        {
-            case "x":
-                dc.DrawLine(XPen, new Point(ex - 3.5, cy - 3.5), new Point(ex + 3.5, cy + 3.5));
-                dc.DrawLine(XPen, new Point(ex + 3.5, cy - 3.5), new Point(ex - 3.5, cy + 3.5));
-                break;
-            case "enojado":  // el párpado de arriba se corta en diagonal, bajando hacia adentro
-                DrawOjoCortado(dc, ex, cy, innerDir, 1);
-                break;
-            default:  // triste: el párpado se corta en diagonal, subiendo hacia adentro
-                DrawOjoCortado(dc, ex, cy, innerDir, -1);
-                break;
-        }
-    }
-
-    // Ojo cuyo borde de arriba está cortado en diagonal: la propia pastilla forma el párpado, sin cejas aparte.
-    // sgn = 1 baja hacia adentro (enojado); sgn = -1 sube hacia adentro (triste).
-    static void DrawOjoCortado(DrawingContext dc, double ex, double cy, int innerDir, int sgn)
-    {
-        double top = cy - EYE_HEIGHT / 2;
-        double mid = top + 3.5;
-        double Corte(double dx) => mid + sgn * innerDir * dx * 0.4;
-
-        var recorte = new StreamGeometry();
-        using (StreamGeometryContext c = recorte.Open())
-        {
-            c.BeginFigure(new Point(ex - 8, Corte(-8)), true, true);
-            c.LineTo(new Point(ex + 8, Corte(8)), true, false);
-            c.LineTo(new Point(ex + 8, top + EYE_HEIGHT + 8), true, false);
-            c.LineTo(new Point(ex - 8, top + EYE_HEIGHT + 8), true, false);
-        }
-
-        dc.PushClip(recorte);
-        DrawOvalEye(dc, ex, cy);
-        dc.Pop();
     }
 
     static void DrawOvalEye(DrawingContext dc, double ex, double cy)

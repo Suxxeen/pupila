@@ -30,9 +30,9 @@ public partial class App : System.Windows.Application
         DetectorContenido.Start();
         ServicioAvisos.Start();
         ServicioVolumen.Start();
+        ServicioBateria.Start();
         ServicioBrillo.Start();
         ServicioTeclas.Start();
-        Reacciones.Start();
         IndicadorBloqueo.Start();
 
         CrearBandeja();

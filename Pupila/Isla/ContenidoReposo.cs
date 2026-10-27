@@ -97,7 +97,7 @@ public static class ContenidoReposo
         if (_chargeUntil > 0 && now >= _chargeUntil && _chargeEndedAt < _chargeUntil)
             _chargeEndedAt = _chargeUntil;
 
-        var status = ServicioBateria.Read();
+        var status = ServicioBateria.Leer();
         if (status is not null)
         {
             var battery = status.Value;
@@ -135,15 +135,15 @@ public static class ContenidoReposo
 
         double now = EstadoIsla.Now;
         double baseOpacity = Math.Max(0, 1 - t * 2.5);
-        var status = ServicioBateria.Read();
+        var status = ServicioBateria.Leer();
         bool chargeNow = now < _chargeUntil && status is not null;  // la carga aparece al instante
         // El reloj aparece 0.2 s después de que termina la carga.
         double ramp = chargeNow ? 1.0 : Math.Clamp((now - _chargeEndedAt - 0.2) / 0.2, 0, 1);
 
-        if (chargeNow)
+        if (chargeNow && status is { } cargando)
         {
             dc.PushOpacity(1.0);
-            DrawCharge(dc, sw, sh, status.Value);
+            DrawCharge(dc, sw, sh, cargando);
             dc.Pop();
         }
         else if (IndicadorBloqueo.Opacidad(now) > 0.001)
@@ -207,7 +207,7 @@ public static class ContenidoReposo
             DrawBell(dc, cx - width / 2 - 30, sh / 2, escala, angulo, Math.Clamp(grande, 0, 1));
         }
 
-        var status = ServicioBateria.Read();
+        var status = ServicioBateria.Leer();
         // La batería se desvanece cuando suena algo; el espectro aparece en su lugar.
         if (status is not null && _specMix < 1.0)
         {
