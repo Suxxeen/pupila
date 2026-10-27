@@ -1,0 +1,57 @@
+using System.Windows;
+using System.Windows.Media;
+
+namespace Pupila;
+
+/// <summary>
+/// Los ojos de la mascota en su propia capa. Como se mueven en cada cuadro, solo esta capa se vuelve a dibujar;
+/// el fondo de la isla (la forma, el reloj, el clima y la batería) no se rehace mientras los ojos se mueven.
+/// Los ojos se redibujan a 30 cuadros por segundo: a esa velocidad se ven igual de fluidos y cuestan la mitad.
+/// </summary>
+public sealed class CapaOjos : FrameworkElement
+{
+    // Un redibujo cada dos cuadros de la pantalla (que va a 60).
+    const int CUADROS_ENTRE_REDIBUJOS = 2;
+
+    double _sw;
+    double _sh;
+    double _offsetX;
+    int _cuadro;
+    bool _eraVisible;
+
+    /// <summary>Actualiza la posición de la pastilla. Lo llama la isla en cada cuadro.</summary>
+    public void Actualizar(double sw, double sh, double offsetX)
+    {
+        _sw = sw;
+        _sh = sh;
+        _offsetX = offsetX + Constants.Pad;  // el cuerpo de la pastilla empieza después del margen
+
+        bool visible = !(Mascot.EsperandoSaludo || IdleContent.CargaActiva || Mascot.Saludando) && Mascot.EyesMix > 0.01
+            && IslandState.HideT < 0.99;  // escondida como barrita, los ojos no se dibujan
+        _cuadro++;
+
+        // Quietos, se redibujan a 30 cuadros por segundo. Buscando o haciendo un gesto, en cada cuadro para que sea fluido.
+        // Al apagarse, se redibuja una vez para borrarlos.
+        if (visible ? Mascot.Moviendose || _cuadro % CUADROS_ENTRE_REDIBUJOS == 0 : _eraVisible)
+            InvalidateVisual();
+        _eraVisible = visible;
+    }
+
+    protected override void OnRender(DrawingContext dc)
+    {
+        // Mismas reglas que tenían los ojos dentro de la isla.
+        if (Mascot.EsperandoSaludo || IdleContent.CargaActiva || Mascot.Saludando) return;
+        double mix = Mascot.EyesMix;
+        if (mix <= 0.01) return;
+
+        // Los ojos solo se ven con la pastilla ya cerrada: al expandirse, se desvanecen.
+        double rest = Math.Clamp(1 - IslandState.Progress * 20, 0, 1);
+        // Oculta como barrita (HideT), los ojos se desvanecen con la pastilla; no quedan flotando sobre el fondo.
+        double pastilla = Math.Clamp(1 - IslandState.HideT, 0, 1);
+        dc.PushTransform(new TranslateTransform(_offsetX, 0));
+        dc.PushOpacity(rest * mix * pastilla);
+        Mascot.DrawEyes(dc, _sw, _sh);
+        dc.Pop();
+        dc.Pop();
+    }
+}

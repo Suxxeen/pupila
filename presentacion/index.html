@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pupila · isla dinámica para Windows</title>
+<meta name="description" content="Pupila es una isla dinámica para Windows: música, clima, hora, avisos y volumen arriba de tu pantalla. En desarrollo.">
+<style>
+  :root {
+    color-scheme: dark;
+    --negro: #000;
+    --gris-1: #101012;
+    --gris-2: #1d1d1f;
+    --texto: #f5f5f7;
+    --texto-medio: #a1a1a6;
+    --texto-tenue: #6e6e73;
+    --linea: rgba(255, 255, 255, .12);
+    --violeta: #8b5cf6;
+    --cian: #22d3ee;
+    --magenta: #f0299a;
+    --ok: #3ddc97;
+    --pendiente: #ffd166;
+    --marca: linear-gradient(92deg, #b794ff, var(--cian) 55%, var(--magenta) 100%);
+    --sistema: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+    --sistema-texto: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body { margin: 0; background: var(--negro); color: var(--texto); }
+  body { font-family: var(--sistema-texto); font-size: 17px; line-height: 1.47; letter-spacing: -.011em; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { color: #2997ff; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1, h2, h3 { font-family: var(--sistema); margin: 0; font-weight: 600; letter-spacing: -.02em; }
+  p { margin: 0; color: var(--texto-medio); }
+
+  /* Barra global, translúcida y pegada arriba */
+  .nav {
+    position: sticky; top: 0; z-index: 20; height: 48px;
+    background: rgba(22, 22, 23, .72); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--linea);
+  }
+  .nav__in { max-width: 1024px; height: 100%; margin: 0 auto; padding: 0 22px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+  .nav__marca { font-weight: 600; font-size: 16px; color: var(--texto); }
+  .nav__links { display: flex; gap: 26px; }
+  .nav__links a { color: var(--texto-medio); }
+  .nav__links a:hover { color: var(--texto); text-decoration: none; }
+
+  .envoltura { max-width: 1024px; margin: 0 auto; padding: 0 22px; }
+
+  /* Portada */
+  .portada { text-align: center; padding-top: 88px; padding-bottom: 56px; }
+  .portada .eyebrow { font-size: 21px; font-weight: 600; color: var(--texto-medio); margin-bottom: 4px; }
+  .portada h1 {
+    font-size: clamp(64px, 11vw, 128px); line-height: 1.02; font-weight: 700; letter-spacing: -.035em;
+    background: var(--marca); -webkit-background-clip: text; background-clip: text; color: transparent;
+    padding-bottom: 6px;
+  }
+  .portada .lema { font-size: clamp(21px, 3vw, 28px); line-height: 1.19; font-weight: 500; color: var(--texto); margin: 14px auto 0; max-width: 680px; letter-spacing: -.02em; }
+  .enlaces { display: flex; gap: 26px; justify-content: center; margin-top: 22px; font-size: 19px; }
+  .enlaces a::after { content: " ›"; }
+  .pill { display: inline-block; margin-top: 18px; padding: 6px 14px; border-radius: 999px; font-size: 13px; color: var(--texto-medio); border: 1px solid var(--linea); }
+  .pill i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--pendiente); margin-right: 8px; vertical-align: middle; }
+
+  /* Isla, grande y centrada */
+  .escena { position: relative; height: 340px; margin: 56px auto 0; max-width: 900px; border-radius: 28px; overflow: hidden; background: #050507; border: 1px solid var(--linea); display: grid; place-items: center; }
+  .aura {
+    position: absolute; inset: -30%; opacity: .5; filter: blur(34px); pointer-events: none;
+    background:
+      radial-gradient(circle at 30% 40%, rgba(139,92,246,.9), transparent 55%),
+      radial-gradient(circle at 70% 60%, rgba(34,211,238,.65), transparent 55%),
+      radial-gradient(circle at 55% 30%, rgba(240,41,154,.55), transparent 60%);
+    animation: deriva 10s ease-in-out infinite alternate;
+  }
+  @keyframes deriva { 0% { transform: translate(-4%, -2%) rotate(0); } 100% { transform: translate(4%, 3%) rotate(8deg); } }
+  .isla {
+    position: relative; height: 46px; width: 190px; border-radius: 999px; background: #000; border: 1px solid rgba(255,255,255,.14);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+    transition: width .6s cubic-bezier(.32,.72,0,1), height .6s cubic-bezier(.32,.72,0,1), border-radius .6s cubic-bezier(.32,.72,0,1);
+  }
+  .isla__ojo { width: 14px; height: 14px; border-radius: 50%; background: var(--marca); }
+  .isla__panel { display: none; width: 100%; padding: 16px 20px; text-align: left; font-size: 14px; color: var(--texto-medio); }
+  .isla__panel b { display: block; color: var(--texto); font-size: 19px; font-weight: 600; letter-spacing: -.01em; }
+  .isla__barra { height: 4px; border-radius: 999px; background: rgba(255,255,255,.15); margin-top: 12px; overflow: hidden; }
+  .isla__barra span { display: block; height: 100%; width: 40%; background: var(--marca); }
+  .escena:hover .isla, .escena:focus-within .isla { width: 400px; height: 124px; border-radius: 34px; }
+  .escena:hover .isla__ojo, .escena:focus-within .isla__ojo { display: none; }
+  .escena:hover .isla__panel, .escena:focus-within .isla__panel { display: block; }
+  .escena__pie { position: absolute; bottom: 14px; left: 0; right: 0; text-align: center; font-size: 13px; color: var(--texto-tenue); }
+
+  /* Secciones de ancho completo, alternadas */
+  .bloque { padding: 96px 0; text-align: center; }
+  .bloque--gris { background: var(--gris-1); }
+  .bloque h2 { font-size: clamp(40px, 6vw, 64px); line-height: 1.07; font-weight: 600; letter-spacing: -.028em; }
+  .bloque h2 span { color: var(--texto-tenue); }
+  .bloque .sub { font-size: clamp(19px, 2.4vw, 24px); line-height: 1.33; font-weight: 500; color: var(--texto-medio); max-width: 680px; margin: 14px auto 0; letter-spacing: -.015em; }
+  .bloque .sub b { color: var(--texto); font-weight: 600; }
+
+  /* Tarjetas de funciones, como las de Apple: grandes, con bordes redondeados */
+  .rejilla { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 56px; text-align: left; }
+  .tarjeta { background: var(--gris-2); border-radius: 28px; padding: 40px 36px; min-height: 280px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
+  .tarjeta h3 { font-size: 34px; line-height: 1.1; font-weight: 600; color: var(--texto); letter-spacing: -.022em; }
+  .tarjeta p { font-size: 17px; margin-top: 10px; max-width: 360px; }
+  .tarjeta .enlace { margin-top: 20px; font-size: 17px; }
+  .tarjeta--ancha { grid-column: 1 / -1; min-height: 340px; }
+  .mini { margin-top: 28px; height: 56px; display: flex; align-items: center; justify-content: flex-start; }
+  .mini i { display: inline-block; height: 40px; border-radius: 999px; background: #000; border: 1px solid rgba(255,255,255,.12); }
+  .mini .m1 { width: 120px; }
+  .mini .m2 { width: 260px; background: linear-gradient(90deg, #000, #1a1030); }
+
+  /* Estado en dos columnas, sin tablas */
+  .estado { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 56px; text-align: left; }
+  .estado__col { background: var(--gris-2); border-radius: 28px; padding: 36px; }
+  .estado__col h3 { font-size: 26px; margin-bottom: 18px; }
+  .estado__col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+  .estado__col li { display: grid; grid-template-columns: 10px 1fr; gap: 14px; align-items: start; }
+  .estado__col li i { width: 10px; height: 10px; border-radius: 50%; margin-top: 8px; }
+  .estado__col li b { display: block; color: var(--texto); font-weight: 600; font-size: 17px; }
+  .estado__col li span { color: var(--texto-medio); font-size: 15px; }
+  .i-ok { background: var(--ok); }
+  .i-pend { background: var(--pendiente); }
+
+  /* Privacidad, tres columnas simples */
+  .tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 56px; text-align: left; }
+  .tres h3 { font-size: 22px; margin-bottom: 8px; }
+  .tres p { font-size: 16px; }
+
+  /* Videos: fila horizontal, como las de Apple */
+  .fila { display: flex; gap: 16px; overflow-x: auto; padding: 56px 22px 8px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .fila::-webkit-scrollbar { display: none; }
+  .video {
+    flex: 0 0 240px; aspect-ratio: 9 / 16; border-radius: 28px; padding: 22px; text-align: left; scroll-snap-align: start;
+    display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--linea);
+    background: linear-gradient(180deg, rgba(139,92,246,.22), var(--gris-2) 60%);
+  }
+  .video small { color: var(--cian); font-size: 13px; font-weight: 600; }
+  .video h3 { font-size: 24px; line-height: 1.1; color: var(--texto); }
+  .video p { font-size: 14px; margin-top: 8px; }
+
+  footer { border-top: 1px solid var(--linea); padding: 22px 0 40px; font-size: 12px; color: var(--texto-tenue); }
+  footer p + p { margin-top: 10px; }
+
+  @media (max-width: 760px) {
+    .nav__links { display: none; }
+    .portada { padding-top: 56px; padding-bottom: 40px; }
+    .escena { height: 240px; margin-top: 36px; }
+    .escena:hover .isla, .escena:focus-within .isla { width: 290px; height: 110px; }
+    .bloque { padding: 72px 0; }
+    .rejilla, .estado, .tres { grid-template-columns: 1fr; }
+    .tarjeta { min-height: 240px; padding: 30px 26px; }
+    .tarjeta h3 { font-size: 28px; }
+    .estado__col { padding: 28px 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .aura { animation: none; }
+    .isla { transition: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Principal">
+  <div class="nav__in">
+    <span class="nav__marca">Pupila</span>
+    <div class="nav__links">
+      <a href="#isla">La isla</a>
+      <a href="#funciones">Funciones</a>
+      <a href="#privacidad">Privacidad</a>
+      <a href="#estado">Estado</a>
+      <a href="#videos">Videos</a>
+    </div>
+  </div>
+</nav>
+
+<header class="portada envoltura">
+  <p class="eyebrow">Isla dinámica para Windows</p>
+  <h1>Pupila</h1>
+  <p class="lema">Música, clima, hora y avisos, arriba de tu pantalla. Solo cuando los necesitas.</p>
+  <div class="enlaces">
+    <a href="#funciones">Ver funciones</a>
+    <a href="#estado">Estado del proyecto</a>
+  </div>
+  <span class="pill"><i></i>En desarrollo · versión 1.0.2</span>
+
+  <div class="escena" tabindex="0" aria-label="Demostración de la isla. Pasa el mouse para abrirla.">
+    <div class="aura" aria-hidden="true"></div>
+    <div class="isla">
+      <span class="isla__ojo"></span>
+      <div class="isla__panel">
+        <b>Canción de ejemplo</b>
+        Artista · 2:14 / 3:40
+        <div class="isla__barra"><span></span></div>
+      </div>
+    </div>
+    <div class="escena__pie">Pasa el mouse por la isla</div>
+  </div>
+</header>
+
+<section class="bloque bloque--gris" id="isla">
+  <div class="envoltura">
+    <h2>Lo que aparece.<br><span>Y lo que no.</span></h2>
+    <p class="sub">En reposo solo se ve la hora, el clima y una mascota pequeña. Cuando algo pasa, la isla se abre.</p>
+  </div>
+</section>
+
+<section class="bloque" id="funciones">
+  <div class="envoltura">
+    <h2>Funciones.</h2>
+    <div class="rejilla">
+      <div class="tarjeta tarjeta--ancha">
+        <div>
+          <h3>Reproductor.</h3>
+          <p>La canción que suena, con la portada difuminada, la barra de progreso y los controles. Funciona con cualquier reproductor compatible con Windows.</p>
+        </div>
+        <div class="mini"><i class="m2"></i></div>
+      </div>
+      <div class="tarjeta">
+        <div>
+          <h3>Volumen y brillo.</h3>
+          <p>Al cambiarlos, la barra aparece dentro de la isla.</p>
+        </div>
+        <div class="mini"><i class="m1"></i></div>
+      </div>
+      <div class="tarjeta">
+        <div>
+          <h3>Avisos.</h3>
+          <p>Una campanita con punto rojo cuenta lo que todavía no has visto.</p>
+        </div>
+        <div class="mini"><i class="m1"></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bloque bloque--gris" id="privacidad">
+  <div class="envoltura">
+    <h2>Privacidad.<br><span>Sin trampas.</span></h2>
+    <div class="tres">
+      <div><h3>No guarda lo que escribes.</h3><p>Solo escucha las teclas de volumen. Las que envía la propia app se ignoran.</p></div>
+      <div><h3>No envía tus datos.</h3><p>La configuración vive en tu carpeta de usuario. No hay servidor propio.</p></div>
+      <div><h3>Clima aproximado.</h3><p>Consulta Open-Meteo con tu ubicación aproximada, por IP.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="bloque" id="estado">
+  <div class="envoltura">
+    <h2>Estado.<br><span>Sin adornos.</span></h2>
+    <div class="estado">
+      <div class="estado__col">
+        <h3>Probado en Windows 11</h3>
+        <ul>
+          <li><i class="i-ok"></i><div><b>Reposo</b><span>Hora, clima y batería.</span></div></li>
+          <li><i class="i-ok"></i><div><b>Reproductor y volumen</b><span>Controles, barra de progreso y botones del panel.</span></div></li>
+          <li><i class="i-ok"></i><div><b>Avisos y brillo</b><span>Campanita y barra compacta.</span></div></li>
+        </ul>
+      </div>
+      <div class="estado__col">
+        <h3>Pendiente</h3>
+        <ul>
+          <li><i class="i-pend"></i><div><b>Consumo</b><span>Hoy usa más memoria de la que debería.</span></div></li>
+          <li><i class="i-pend"></i><div><b>Portada con música real</b><span>Verificada en código, no con una canción sonando.</span></div></li>
+          <li><i class="i-pend"></i><div><b>Windows 10</b><span>Se reportaron fallas, todavía sin confirmar.</span></div></li>
+          <li><i class="i-pend"></i><div><b>Firma digital</b><span>Windows puede mostrar un aviso hasta que esté firmada.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bloque bloque--gris" id="videos">
+  <div class="envoltura">
+    <h2>Videos.<br><span>Para redes.</span></h2>
+    <p class="sub">Cinco escenas verticales de 10 a 20 segundos.</p>
+  </div>
+  <div class="fila">
+    <div class="video"><small>01 · GANCHO</small><div><h3>La isla que espera.</h3><p>Solo la hora. Pasas el mouse y se abre.</p></div></div>
+    <div class="video"><small>02 · MÚSICA</small><div><h3>Portada que respira.</h3><p>El fondo cambia con la canción.</p></div></div>
+    <div class="video"><small>03 · VOLUMEN</small><div><h3>Un toque, un indicador.</h3><p>La isla y Windows, juntos.</p></div></div>
+    <div class="video"><small>04 · AVISOS</small><div><h3>La campanita.</h3><p>Llega un aviso y el punto se apaga al verlo.</p></div></div>
+    <div class="video"><small>05 · PROCESO</small><div><h3>Hecho con IA.</h3><p>Cómo se construyó sin saber programar.</p></div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="envoltura">
+    <p>Pupila es software de código abierto con licencia MIT. Se hizo con ayuda de IA (Claude) bajo la dirección de su autor.</p>
+    <p>Este sitio es una presentación en desarrollo. Las funciones y los datos pueden cambiar.</p>
+  </div>
+</footer>
+
+</body>
+</html>
