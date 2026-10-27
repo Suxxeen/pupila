@@ -10,13 +10,14 @@ Pupila está inspirada en [Nusa](https://rama2555.github.io/nusa/), de rama2555,
 
 - **Pensada para Latinoamérica:** la interfaz y los textos están en español, y el clima se toma de la región y la ubicación que Windows ya tiene.
 - **Funciones propias:** indicador de Mayús y Bloq Num, saludo de arranque, animación de carga con corazones, barra de volumen y brillo, y lectura del clima desde el widget de Windows. La lista completa está abajo.
-- **Código y diseño propios:** no usa código, imágenes, sonidos ni nombres de Nusa. La mascota y la identidad visual se diseñaron desde cero.
+- **Código y diseño propios:** no usa código, imágenes, sonidos ni nombres de Nusa. La mascota de ojos se inspira en la idea de Nusa, pero es distinta y transmite más emociones.
 
 Este proyecto se hizo con ayuda de IA (Claude, de Anthropic) bajo la dirección de su autor, que no es programador. Las decisiones de diseño y de producto son del autor; el código lo escribió y lo revisó el asistente, y se probó en la PC del autor.
 
 ## Funciones
 
 - **Reposo:** hora centrada, clima, batería y una mascota de ojos que parpadea, se duerme y saluda.
+- **Emociones:** la mascota puede mostrar enojo, tristeza, corazones y ojos en X. También mira alrededor para buscar, piensa, asiente, niega con la cabeza y baila.
 - **Saludo de arranque:** una línea de luz recorre el borde superior, la pastilla se expande y aparece "Bienvenido" antes de mostrar el reloj.
 - **Reproductor:** muestra la canción que está sonando en cualquier app compatible con los controles multimedia de Windows, con portada difuminada, barra de progreso, controles y botones de volumen.
 - **Espectro:** mientras suena música, la isla muestra barras que siguen el audio.
