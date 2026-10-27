@@ -9,7 +9,6 @@ release/
 .vscode/
 
 # Datos personales o de prueba: la configuración real vive en %APPDATA%\Pupila, no en el repositorio
-config.json
 *.log
 avisos.ps1
 .claude/

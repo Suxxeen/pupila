@@ -10,7 +10,7 @@ public partial class App : System.Windows.Application
 {
     private Mutex? _instancia;  // mantiene vivo el mutex mientras la app está abierta
     private WinForms.NotifyIcon? _bandeja;
-    private IslandWindow? _isla;
+    private VentanaIsla? _isla;
 
     protected override void OnStartup(System.Windows.StartupEventArgs e)
     {
@@ -24,37 +24,37 @@ public partial class App : System.Windows.Application
             return;
         }
 
-        WeatherService.Start();
-        MediaService.Start();
-        AudioService.Start();
-        ContentDetector.Start();
-        NotificationService.Start();
-        VolumeService.Start();
-        BrightnessService.Start();
-        TeclasService.Start();
+        ServicioClima.Start();
+        ServicioMultimedia.Start();
+        ServicioAudio.Start();
+        DetectorContenido.Start();
+        ServicioAvisos.Start();
+        ServicioVolumen.Start();
+        ServicioBrillo.Start();
+        ServicioTeclas.Start();
         Reacciones.Start();
         IndicadorBloqueo.Start();
 
         CrearBandeja();
 
-        _isla = new IslandWindow();
+        _isla = new VentanaIsla();
         _isla.Opacity = 0;  // oculta hasta el destello
-        IslandState.Minimized = true;  // arranca como barrita; al aparecer se expande con la animación normal
-        Mascot.EsperandoSaludo = true;  // la pastilla sale vacía; el reloj no aparece antes del saludo
+        EstadoIsla.Minimized = true;  // arranca como barrita; al aparecer se expande con la animación normal
+        Mascota.EsperandoSaludo = true;  // la pastilla sale vacía; el reloj no aparece antes del saludo
         _isla.Show();
-        Intro.Reproducir(() =>
+        Introduccion.Reproducir(() =>
         {
             // Primero la pastilla se expande con su animación normal.
-            IslandState.AnimateTo(0.0);
+            EstadoIsla.AnimateTo(0.0);
             if (_isla != null)
             {
                 _isla.Opacity = 1;
-                IslandState.Minimized = false;  // la barrita se expande hasta la pastilla
+                EstadoIsla.Minimized = false;  // la barrita se expande hasta la pastilla
             }
 
             // Después, los ojos salen fuera de plano y borrosos, se enfocan mientras saludan; luego entra el reloj.
-            Despues(0.6, Mascot.EmpezarSaludo);
-            Despues(3.0, Mascot.TerminarSaludo);  // después de que el saludo termina de regresar
+            Despues(0.6, Mascota.EmpezarSaludo);
+            Despues(3.0, Mascota.TerminarSaludo);  // después de que el saludo termina de regresar
         });
     }
 

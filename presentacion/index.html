@@ -167,7 +167,6 @@
       <a href="#funciones">Funciones</a>
       <a href="#privacidad">Privacidad</a>
       <a href="#estado">Estado</a>
-      <a href="#videos">Videos</a>
     </div>
   </div>
 </nav>
@@ -175,12 +174,12 @@
 <header class="portada envoltura">
   <p class="eyebrow">Isla dinámica para Windows</p>
   <h1>Pupila</h1>
-  <p class="lema">Música, clima, hora y avisos, arriba de tu pantalla. Solo cuando los necesitas.</p>
+  <p class="lema">Música, clima, hora y avisos, arriba de tu pantalla. La isla se abre cuando pasa algo.</p>
   <div class="enlaces">
     <a href="#funciones">Ver funciones</a>
     <a href="#estado">Estado del proyecto</a>
   </div>
-  <span class="pill"><i></i>En desarrollo · versión 1.0.2</span>
+  <span class="pill"><i></i>En desarrollo · versión 1.0.0-beta</span>
 
   <div class="escena" tabindex="0" aria-label="Demostración de la isla. Pasa el mouse para abrirla.">
     <div class="aura" aria-hidden="true"></div>
@@ -199,7 +198,7 @@
 <section class="bloque bloque--gris" id="isla">
   <div class="envoltura">
     <h2>Lo que aparece.<br><span>Y lo que no.</span></h2>
-    <p class="sub">En reposo solo se ve la hora, el clima y una mascota pequeña. Cuando algo pasa, la isla se abre.</p>
+    <p class="sub">En reposo se ven la hora, el clima, la batería y una mascota pequeña. Cuando algo pasa, la isla se abre.</p>
   </div>
 </section>
 
@@ -210,7 +209,7 @@
       <div class="tarjeta tarjeta--ancha">
         <div>
           <h3>Reproductor.</h3>
-          <p>La canción que suena, con la portada difuminada, la barra de progreso y los controles. Funciona con cualquier reproductor compatible con Windows.</p>
+          <p>La canción que suena, con la portada difuminada, la barra de progreso y los controles. Funciona con las apps que Windows reconoce como reproductores de música o video.</p>
         </div>
         <div class="mini"><i class="m2"></i></div>
       </div>
@@ -234,11 +233,11 @@
 
 <section class="bloque bloque--gris" id="privacidad">
   <div class="envoltura">
-    <h2>Privacidad.<br><span>Sin trampas.</span></h2>
+    <h2>Privacidad.<br><span>Qué hace, en concreto.</span></h2>
     <div class="tres">
-      <div><h3>No guarda lo que escribes.</h3><p>Solo escucha las teclas de volumen. Las que envía la propia app se ignoran.</p></div>
-      <div><h3>No envía tus datos.</h3><p>La configuración vive en tu carpeta de usuario. No hay servidor propio.</p></div>
-      <div><h3>Clima aproximado.</h3><p>Consulta Open-Meteo con tu ubicación aproximada, por IP.</p></div>
+      <div><h3>Lo que lee.</h3><p>La canción que suena (título, artista, portada y posición). Sus botones solo piden a Windows reproducir, pausar, cambiar de canción o mover la posición. También lee el volumen, el brillo y la batería. De los avisos, solo la cantidad, el identificador y la app. Del teclado, solo volumen, Mayús y Bloq Num.</p></div>
+      <div><h3>Una sola conexión.</h3><p>Solo se conecta a api.open-meteo.com, para el clima, y le envía la latitud y la longitud. Si el botón de Widgets no muestra el clima, pide la ubicación a Windows (Wi-Fi o GPS). No usa tu IP. No hay servidor propio ni telemetría.</p></div>
+      <div><h3>Lo que no hace.</h3><p>No guarda ni envía lo que escribes. El audio del altavoz (no el micrófono) se analiza en memoria y no se guarda ni se envía. La ventana activa solo se lee: no hace clic, no cambia nada y no guarda nada. Solo escribe dos scripts de PowerShell en %APPDATA%\Pupila.</p></div>
     </div>
   </div>
 </section>
@@ -265,20 +264,6 @@
         </ul>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="bloque bloque--gris" id="videos">
-  <div class="envoltura">
-    <h2>Videos.<br><span>Para redes.</span></h2>
-    <p class="sub">Cinco escenas verticales de 10 a 20 segundos.</p>
-  </div>
-  <div class="fila">
-    <div class="video"><small>01 · GANCHO</small><div><h3>La isla que espera.</h3><p>Solo la hora. Pasas el mouse y se abre.</p></div></div>
-    <div class="video"><small>02 · MÚSICA</small><div><h3>Portada que respira.</h3><p>El fondo cambia con la canción.</p></div></div>
-    <div class="video"><small>03 · VOLUMEN</small><div><h3>Un toque, un indicador.</h3><p>La isla y Windows, juntos.</p></div></div>
-    <div class="video"><small>04 · AVISOS</small><div><h3>La campanita.</h3><p>Llega un aviso y el punto se apaga al verlo.</p></div></div>
-    <div class="video"><small>05 · PROCESO</small><div><h3>Hecho con IA.</h3><p>Cómo se construyó sin saber programar.</p></div></div>
   </div>
 </section>
 

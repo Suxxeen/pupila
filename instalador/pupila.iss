@@ -44,9 +44,9 @@ Name: "desktopicon"; Description: "Crear un acceso directo en el escritorio"; Gr
 Name: "autostart"; Description: "Iniciar {#MyAppName} al encender Windows"; GroupDescription: "Opciones:"; Flags: unchecked
 
 [Files]
-; El ejecutable (autocontenido) y sus iconos, que van en Assets\icons junto al .exe.
+; El ejecutable (autocontenido) y sus iconos, que van en Recursos\iconos junto al .exe.
 Source: "..\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\publish\Assets\*"; DestDir: "{app}\Assets"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\publish\Recursos\*"; DestDir: "{app}\Recursos"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -56,6 +56,10 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 [Registry]
 ; Inicio automático: solo si lo marcó. Al desinstalar, Windows quita esta entrada.
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: autostart
+
+[UninstallDelete]
+; Al desinstalar, borra también la carpeta de datos (los dos scripts de PowerShell que crea Pupila).
+Type: filesandordirs; Name: "{userappdata}\{#MyAppName}"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "Abrir {#MyAppName} ahora"; Flags: nowait postinstall skipifsilent
