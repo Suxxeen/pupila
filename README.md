@@ -5,9 +5,9 @@ Una isla dinámica para Windows 11. Pasa el mouse por arriba de la pantalla y ap
 > **Estado:** 1.0.0-beta, en desarrollo. Solo Windows 11 de 64 bits. Ver [Limitaciones](#limitaciones).
 
 <p align="center">
-  <img src="Pupila/documentacion/capturas/isla-reposo.png" alt="Isla en reposo: hora, clima, batería y campanita de avisos">
+  <img src="Pupila/documentacion/capturas/escritorio-reposo.png" alt="Pupila en el escritorio: isla en reposo con hora, clima, batería y campanita de avisos" width="800">
   <br>
-  <img src="Pupila/documentacion/capturas/isla-expandida.png" alt="Isla expandida con el reproductor" width="480">
+  <img src="Pupila/documentacion/capturas/escritorio-expandida.png" alt="Pupila en el escritorio: isla expandida con el reproductor" width="800">
 </p>
 
 ## Funciones
