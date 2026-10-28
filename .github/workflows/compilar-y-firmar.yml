@@ -1,0 +1,85 @@
+# Compila Pupila en un servidor de GitHub. Si ya están configuradas las variables de firma,
+# también pide la firma a SignPath. Mientras no lo estén, compila y deja los archivos sin firmar.
+# Se ejecuta solo a mano, desde la pestaña Actions.
+name: Compilar y firmar
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  compilar:
+    runs-on: windows-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Preparar .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publicar el ejecutable
+        working-directory: Pupila
+        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
+
+      - name: Subir el ejecutable sin firmar
+        id: subir-exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: pupila-exe-sin-firmar
+          path: Pupila/publish/Pupila.exe
+
+      - name: Pedir la firma del ejecutable
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          github-artifact-id: ${{ steps.subir-exe.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: Pupila/publish-firmado
+
+      - name: Poner el ejecutable firmado en su lugar
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        shell: pwsh
+        run: Copy-Item -Force Pupila/publish-firmado/Pupila.exe Pupila/publish/Pupila.exe
+
+      - name: Instalar Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Compilar el instalador
+        working-directory: Pupila
+        shell: pwsh
+        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" instalador\pupila.iss'
+
+      - name: Subir el instalador sin firmar
+        id: subir-instalador
+        uses: actions/upload-artifact@v4
+        with:
+          name: pupila-instalador-sin-firmar
+          path: Pupila/release/pupila-setup-*.exe
+
+      - name: Pedir la firma del instalador
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          github-artifact-id: ${{ steps.subir-instalador.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: Pupila/release-firmado
+
+      - name: Subir el instalador firmado
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pupila-instalador-firmado
+          path: Pupila/release-firmado/pupila-setup-*.exe
