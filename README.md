@@ -86,7 +86,7 @@ Para generar un solo ejecutable autocontenido:
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
 ```
 
-Para crear el instalador, instala [Inno Setup 6](https://jrsoftware.org/isinfo.php), genera primero el ejecutable con el comando anterior y luego compila `instalador/pupila.iss`. El instalador queda en `release/`, dentro de la carpeta `Pupila`.
+Para crear el instalador, instala [Inno Setup 6](https://jrsoftware.org/isinfo.php), genera primero el ejecutable con el comando anterior y luego compila `Pupila/instalador/pupila.iss`. El instalador queda en `Pupila/release/`.
 
 Más detalles para quien quiera colaborar: [CONTRIBUTING.md](CONTRIBUTING.md) y [Pupila/documentacion/COMO-FUNCIONA.md](Pupila/documentacion/COMO-FUNCIONA.md).
 
