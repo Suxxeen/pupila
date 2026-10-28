@@ -2,8 +2,8 @@
 ; Compilar con ISCC.exe sobre este archivo. Genera release\pupila-setup-<versión>.exe
 
 #define MyAppName "Pupila"
-#define MyAppVersion "1.0.0-beta"
-#define MyAppVersionNumero "1.0.0.0"
+#define MyAppVersion "1.0.1-beta"
+#define MyAppVersionNumero "1.0.1.0"
 #define MyAppPublisher "Suxxeen"
 #define MyAppExeName "Pupila.exe"
 

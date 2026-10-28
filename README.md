@@ -2,7 +2,7 @@
 
 Una isla dinámica para Windows 11. Pasa el mouse por arriba de la pantalla y aparecen la hora, el clima, la música que estás escuchando, tus avisos y una mascota de ojos que se duerme, saluda y mira alrededor.
 
-> **Estado:** 1.0.0-beta, en desarrollo. Solo Windows 11 de 64 bits. Ver [Limitaciones](#limitaciones).
+> **Estado:** 1.0.1-beta, en desarrollo. Solo Windows 11 de 64 bits. Ver [Limitaciones](#limitaciones).
 
 <p align="center">
   <img src="Pupila/documentacion/capturas/escritorio-reposo.png" alt="Pupila en el escritorio: isla en reposo con hora, clima, batería y campanita de avisos" width="800">
@@ -27,7 +27,7 @@ Está hecha para usuarios de habla hispana: la interfaz y los textos están en e
 
 ## Instalar
 
-1. Descarga `pupila-setup-1.0.0-beta.exe` desde la [página de versiones](https://github.com/Suxxeen/pupila/releases).
+1. Descarga `pupila-setup-1.0.1-beta.exe` desde la [página de versiones](https://github.com/Suxxeen/pupila/releases).
 2. Ejecútalo. No pide permisos de administrador: se instala en tu carpeta de usuario.
 3. Si quieres que arranque con Windows, marca la opción en el instalador.
 

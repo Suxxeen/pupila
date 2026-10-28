@@ -1,5 +1,9 @@
 # Cambios
 
+## 1.0.1-beta
+
+- Corrige que la isla no se veía sobre otras aplicaciones: Windows la bajaba debajo de las ventanas. Ahora se vuelve a poner encima cada medio segundo, sin activarla.
+
 ## 1.0.0-beta
 
 Primera versión para probar. Solo Windows 11 de 64 bits.
