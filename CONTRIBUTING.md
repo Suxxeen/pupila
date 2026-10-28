@@ -20,10 +20,10 @@ Solo puede correr una copia de Pupila a la vez. Si ya hay una abierta, la nueva 
 
 ## Publicar
 
-Para generar un solo ejecutable autocontenido, en la carpeta `Pupila\publish\`:
+Para generar un solo ejecutable autocontenido, dentro de la carpeta `Pupila` (la salida queda en `Pupila\publish\`):
 
 ```bash
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
 ```
 
 Para el instalador, instala [Inno Setup 6](https://jrsoftware.org/isinfo.php), publica primero con el comando de arriba y luego compila `Pupila\instalador\pupila.iss`. El instalador queda en `Pupila\release\`.

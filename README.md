@@ -2,7 +2,7 @@
 
 Una isla dinámica para Windows 11. Pasa el mouse por arriba de la pantalla y aparecen la hora, el clima, la música que estás escuchando, tus avisos y una mascota de ojos que se duerme, saluda y mira alrededor.
 
-> **Estado:** 1.0.1-beta, en desarrollo. Solo Windows 11 de 64 bits. Ver [Limitaciones](#limitaciones).
+> **Estado:** 1.0.2-beta, en desarrollo. Solo Windows 11 de 64 bits. Ver [Limitaciones](#limitaciones).
 
 <p align="center">
   <img src="Pupila/documentacion/capturas/escritorio-reposo.png" alt="Pupila en el escritorio: isla en reposo con hora, clima, batería y campanita de avisos" width="800">
@@ -27,7 +27,7 @@ Está hecha para usuarios de habla hispana: la interfaz y los textos están en e
 
 ## Instalar
 
-1. Descarga `pupila-setup-1.0.1-beta.exe` desde la [página de versiones](https://github.com/Suxxeen/pupila/releases).
+1. Descarga `pupila-setup-1.0.2-beta.exe` desde la [página de versiones](https://github.com/Suxxeen/pupila/releases).
 2. Ejecútalo. No pide permisos de administrador: se instala en tu carpeta de usuario.
 3. Si quieres que arranque con Windows, marca la opción en el instalador.
 
@@ -83,7 +83,7 @@ dotnet build -c Release
 Para generar un solo ejecutable autocontenido:
 
 ```bash
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
 ```
 
 Para crear el instalador, instala [Inno Setup 6](https://jrsoftware.org/isinfo.php), genera primero el ejecutable con el comando anterior y luego compila `Pupila/instalador/pupila.iss`. El instalador queda en `Pupila/release/`.
@@ -104,13 +104,13 @@ Pupila se hizo con ayuda de IA (Claude, de Anthropic) bajo la dirección de su a
 
 ## Firma de código
 
-La firma de código de Pupila es gratuita, gracias a [SignPath.io](https://about.signpath.io/), con un certificado de la [SignPath Foundation](https://signpath.org/).
+La firma de código de Pupila está solicitada a la [SignPath Foundation](https://signpath.org/), que la ofrece gratis a proyectos de código abierto a través de [SignPath.io](https://about.signpath.io/). Mientras la solicitud no esté aprobada, el instalador no está firmado y Windows mostrará la advertencia de arriba.
 
 **Equipo y roles**
 
 - Autor, revisor y aprobador de firmas: Suxxeen.
 
-Cada versión firmada se compila en GitHub Actions desde este repositorio, y el aprobador la revisa antes de firmarla.
+Cuando la firma esté aprobada, cada versión firmada se compilará en GitHub Actions desde este repositorio, y el aprobador la revisará antes de firmarla.
 
 **Privacidad**
 

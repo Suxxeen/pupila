@@ -1,5 +1,10 @@
 # Cambios
 
+## 1.0.2-beta
+
+- Baja el consumo de memoria: Pupila pasa de unos 156 MB a unos 77 MB de memoria privada en reposo. El ejecutable ya no va comprimido, así que ocupa más espacio en el disco (unos 190 MB).
+- El proceso que lee los avisos de Windows (un ayudante de PowerShell) usa unos 71 MB; esta versión no lo cambió.
+
 ## 1.0.1-beta
 
 - Corrige que la isla no se veía sobre otras aplicaciones: Windows la bajaba debajo de las ventanas. Ahora se vuelve a poner encima cada medio segundo, sin activarla.
