@@ -102,6 +102,20 @@ Más detalles para quien quiera colaborar: [CONTRIBUTING.md](CONTRIBUTING.md) y 
 
 Pupila se hizo con ayuda de IA (Claude, de Anthropic) bajo la dirección de su autor, que no es programador. Las decisiones de diseño y de producto son del autor; el código lo escribió y lo revisó el asistente, y se probó en la PC del autor.
 
+## Firma de código
+
+La firma de código de Pupila es gratuita, gracias a [SignPath.io](https://about.signpath.io/), con un certificado de la [SignPath Foundation](https://signpath.org/).
+
+**Equipo y roles**
+
+- Autor, revisor y aprobador de firmas: Suxxeen.
+
+Cada versión firmada se compila en GitHub Actions desde este repositorio, y el aprobador la revisa antes de firmarla.
+
+**Privacidad**
+
+Pupila guarda sus datos en tu PC y no los envía a nadie. La única excepción es la consulta del clima a Open-Meteo, con tu latitud y longitud. Lo que se lee y lo que se envía está en la sección [Privacidad](#privacidad-qué-hace-pupila-con-tus-datos).
+
 ## Licencia
 
 [MIT](LICENSE). Puedes usar, modificar y distribuir el código; solo conserva el aviso de copyright.
