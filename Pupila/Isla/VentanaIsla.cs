@@ -35,6 +35,7 @@ public partial class VentanaIsla : Window
     private readonly DispatcherTimer _osdCierre;  // cuánto tiempo se queda la barra de volumen o brillo
     private readonly DispatcherTimer _teclaCheck;  // espera a leer el volumen después de una tecla
     private readonly DispatcherTimer _repeticion;  // repite la tecla de volumen mientras se mantiene el clic
+    private readonly DispatcherTimer _mantenerEncima;  // la vuelve a poner encima de las demás ventanas
     private int _direccionMantenida;  // -1 o 1 mientras se mantiene un botón de volumen
 
     private double _ultimoCuadro;
@@ -126,6 +127,9 @@ public partial class VentanaIsla : Window
         MouseLeftButtonUp += (_, _) => PararRepeticion();
 
         _ultimoCuadro = _reloj.Elapsed.TotalSeconds;
+
+        _mantenerEncima = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+        _mantenerEncima.Tick += (_, _) => MantenerEncima();
 
         MouseEnter += AlEntrar;
         MouseLeave += AlSalir;
@@ -432,6 +436,14 @@ public partial class VentanaIsla : Window
     [DllImport("user32.dll", EntryPoint = "SetWindowLongW")]
     private static extern int SetWindowLong32(IntPtr hWnd, int nIndex, int dwNewLong);
 
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+    private static readonly IntPtr HwndEncima = new(-1);  // HWND_TOPMOST: la banda de ventanas siempre encima
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_NOMOVE = 0x0002;
+    private const uint SWP_NOACTIVATE = 0x0010;
+
     private void AlInicializarOrigen(object? sender, EventArgs e)
     {
         IntPtr hwnd = new WindowInteropHelper(this).Handle;
@@ -439,6 +451,17 @@ public partial class VentanaIsla : Window
         long estilo = ObtenerEstilo(hwnd);
         PonerEstilo(hwnd, estilo | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE);
         HwndSource.FromHwnd(hwnd).AddHook(FiltrarMensajes);
+        _mantenerEncima.Start();
+    }
+
+    /// <summary>
+    /// Windows puede bajar la isla debajo de otras ventanas, aunque esté marcada como "siempre encima".
+    /// Cada medio segundo se vuelve a poner encima, sin activarla, para que se vea sobre las aplicaciones.
+    /// </summary>
+    private void MantenerEncima()
+    {
+        IntPtr hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd != IntPtr.Zero) SetWindowPos(hwnd, HwndEncima, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     }
 
     private static long ObtenerEstilo(IntPtr hwnd)
