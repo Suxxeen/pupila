@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
@@ -42,6 +42,11 @@ public partial class VentanaIsla : Window
     private readonly CuadroFijo _cuadroFijo = new();
     private double _siguienteRevision;
     private bool _cubierta;
+    private DispatcherTimer? _ocultarTras;  // cuenta los 15 s antes de esconder otra vez la isla mostrada con el mouse
+    private DispatcherTimer? _bloqueoTimer;  // cuenta los 2,5 s en que la isla mostrada con el mouse no abre el multimedia
+    private bool _bloqueoMultimedia;
+    private bool _mostrarPorMouse;  // el mouse está sobre la barrita de una isla escondida: se muestra la pastilla con el reloj
+    private bool _avisoVisible;  // si el aviso de la pastilla se veía en el cuadro anterior
 
     // Cuerpo con resorte: tamaño de la pastilla en reposo.
     private double _ancho = Constantes.IdleW;
@@ -94,8 +99,12 @@ public partial class VentanaIsla : Window
             AlExpirarCierre();
         };
 
-        // Un aviso nuevo solo mueve a la mascota; el aviso se ve en la campanita.
-        ServicioAvisos.Nueva += _ => Dispatcher.BeginInvoke(new Action(() => Mascota.Notify()));
+        // Un aviso nuevo mueve a la mascota. Si la isla está cerrada, sale en la pastilla un momento.
+        ServicioAvisos.Nueva += aviso => Dispatcher.BeginInvoke(new Action(() =>
+        {
+            Mascota.Notify();
+            if (EstadoIsla.Progress < 0.5) AlertaAviso.Mostrar(aviso, EstadoIsla.Now);
+        }));
 
         _osdCierre = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1500) };
         _osdCierre.Tick += (_, _) =>
@@ -161,6 +170,11 @@ public partial class VentanaIsla : Window
         Mascota.Update(ahora, dt, Nativo.IdleSeconds());
         IndicadorBloqueo.Revisar(ahora);
         ContenidoReposo.Update(ahora, dt);
+        AlertaAviso.Update(ahora, dt, PuedeMostrarAviso());
+        // Cuando el aviso de la pastilla se oculta, los avisos ya se vieron y el número de la campanita vuelve a cero.
+        bool avisoVisible = AlertaAviso.Mix > 0.5;
+        if (_avisoVisible && !avisoVisible) ServicioAvisos.MarcarVistos();
+        _avisoVisible = avisoVisible;
 
 
         // Tapado: se revisa cada 0.5 s.
@@ -176,8 +190,10 @@ public partial class VentanaIsla : Window
         Resorte.Step(ref _pulso, ref _pulsoVel, 0.0, dt, 200.0, 0.2);  // rebote que se nota y vuelve a 0
 
         // Cuerpo con resorte. Con carga activa, la pastilla cambia de ancho según la animación de carga.
-        Resorte.Step(ref _ancho, ref _velAncho, ContenidoReposo.ChargeActive ? ContenidoReposo.ChargeWidth : Constantes.IdleW, dt, 220.0, 1.0);
-        Resorte.Step(ref _alto, ref _velAlto, Constantes.IdleH, dt, 220.0, 1.0);
+        // Con un aviso, la pastilla se ensancha para mostrarlo y vuelve a su tamaño al terminar.
+        double anchoBase = ContenidoReposo.ChargeActive ? ContenidoReposo.ChargeWidth : Constantes.IdleW;
+        Resorte.Step(ref _ancho, ref _velAncho, Lerp(anchoBase, AlertaAviso.Ancho, AlertaAviso.Mix), dt, 220.0, 1.0);
+        Resorte.Step(ref _alto, ref _velAlto, Lerp(Constantes.IdleH, AlertaAviso.AltoH, AlertaAviso.Mix), dt, 220.0, 1.0);
 
         var (sw, sh) = TamanoForma();
         _sw = sw;
@@ -208,6 +224,8 @@ public partial class VentanaIsla : Window
         if (tapado != _cubierta)
         {
             _cubierta = tapado;
+            _mostrarPorMouse = false;
+            _bloqueoMultimedia = false;
             EstadoIsla.Revealed = false;
         }
     }
@@ -215,7 +233,7 @@ public partial class VentanaIsla : Window
     /// <summary>Oculta la isla hasta la barrita, o la muestra, con la misma curva que la expansión.</summary>
     private void ActualizarOcultado(double ahora)
     {
-        double objetivo = (EstadoIsla.Minimized || _cubierta) ? 1.0 : 0.0;
+        double objetivo = (EstadoIsla.Minimized || (_cubierta && !_mostrarPorMouse)) ? 1.0 : 0.0;
         if (objetivo != _ocultoHasta)
         {
             _ocultoDesde = EstadoIsla.HideT;
@@ -310,9 +328,19 @@ public partial class VentanaIsla : Window
             // El contenido parte del centro de la pastilla (sw/2 desde Pad), igual que el reproductor.
             dc.PushTransform(new TranslateTransform(Constantes.Pad, 0));
             // La hora y el clima se desvanecen mientras aparece la barra de volumen o brillo.
-            dc.PushOpacity(1 - Math.Clamp(_osdMix, 0, 1));
+            // El aviso de la pastilla reemplaza la hora, el clima y la campanita mientras dura.
+            dc.PushOpacity(Math.Clamp((1 - Math.Clamp(_osdMix, 0, 1)) * (1 - AlertaAviso.Mix), 0, 1));
             ContenidoReposo.Draw(dc, sw, sh, t);
             dc.Pop();
+            dc.Pop();
+        }
+
+        // (3c) Aviso nuevo: la pastilla muestra la app y el título, y se desvanece cuando se abre el reproductor.
+        double avisoOp = AlertaAviso.Mix * Math.Clamp(1 - t * 2, 0, 1);
+        if (avisoOp > 0.01 && EstadoIsla.HideT < 0.5)
+        {
+            dc.PushTransform(new TranslateTransform(Constantes.Pad, 0));
+            AlertaAviso.Draw(dc, sw, sh, avisoOp);
             dc.Pop();
         }
 
@@ -325,9 +353,8 @@ public partial class VentanaIsla : Window
             dc.Pop();
         }
 
-        // (4) Control multimedia: aparece de abajo hacia arriba (PanelReproductor hace el recorte y la opacidad). Sin escala.
+        // (4) Panel abierto: el reproductor, o la lista de avisos si se abrió con la campanita. Aparece de abajo hacia arriba.
         double alpha = Math.Clamp((t - 0.25) / 0.6, 0.0, 1.0);
-        // Con el reproductor abierto se queda el reproductor: la barra compacta solo sale con la isla en reposo.
         if (alpha > 0.0)
             PanelReproductor.Draw(dc, sw, sh, alpha);
 
@@ -343,9 +370,30 @@ public partial class VentanaIsla : Window
     {
         if (EstadoIsla.ArranqueActivo) return;  // durante el arranque, el mouse no despliega la isla
         _cierre.Stop();
-        ServicioAvisos.Limpiar();  // al pasar el mouse, la campanita se queda sin avisos pendientes
+        // Si la isla está escondida porque algo la tapa, pasar el mouse por la barrita muestra solo la pastilla con el reloj:
+        // sin ojos ni saludo de la mascota. En modo mínimo se sigue mostrando solo con un clic.
+        if (_cubierta && !EstadoIsla.Minimized)
+        {
+            _ocultarTras?.Stop();  // si el mouse vuelve antes de los 15 s, la cuenta empieza de nuevo al salir
+            if (!_mostrarPorMouse)
+            {
+                _mostrarPorMouse = true;
+                Mascota.MostrarRelojDirecto();
+                // Los primeros 2,5 s solo se ve el reloj; después el mouse ya puede abrir el multimedia.
+                _bloqueoMultimedia = true;
+                _bloqueoTimer ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.5) };
+                _bloqueoTimer.Tick -= AlTerminarBloqueo;
+                _bloqueoTimer.Tick += AlTerminarBloqueo;
+                _bloqueoTimer.Stop();
+                _bloqueoTimer.Start();
+                return;
+            }
+            if (_bloqueoMultimedia) return;
+        }
         if (!Mascota.Sleeping) Mascota.OnPointerEnter();
-        if (EstadoIsla.HideT < 0.5 || EstadoIsla.Revealed) EstadoIsla.AnimateTo(1.0);
+        // Con un aviso en la pastilla, el mouse no la despliega: el aviso se ve completo.
+        if ((EstadoIsla.HideT < 0.5 || EstadoIsla.Revealed) && AlertaAviso.Mix < 0.5)
+            EstadoIsla.AnimateTo(1.0);
     }
 
     private void AlSalir(object sender, System.Windows.Input.MouseEventArgs e)
@@ -365,9 +413,39 @@ public partial class VentanaIsla : Window
     private void AlExpirarCierre()
     {
         if (EstaSobreIsla()) return;
+        // Si estaba escondida por algo debajo y el mouse la mostró, se queda 15 s a la vista antes de esconderse otra vez.
+        if (_mostrarPorMouse)
+        {
+            _ocultarTras ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(15) };
+            _ocultarTras.Tick -= AlExpirarOcultar;
+            _ocultarTras.Tick += AlExpirarOcultar;
+            _ocultarTras.Stop();
+            _ocultarTras.Start();
+        }
         BarraVolumenBrillo.Ocultar();
         Mascota.OnPointerLeave();
         EstadoIsla.AnimateTo(0.0);
+    }
+
+    /// <summary>Pasaron los 2,5 s del bloqueo: si el mouse sigue encima, ya se abre el multimedia.</summary>
+    private void AlTerminarBloqueo(object? sender, EventArgs e)
+    {
+        _bloqueoTimer?.Stop();
+        _bloqueoMultimedia = false;
+        if (_mostrarPorMouse && EstaSobreIsla() && AlertaAviso.Mix < 0.5)
+        {
+            Mascota.OnPointerEnter();
+            EstadoIsla.AnimateTo(1.0);
+        }
+    }
+
+    /// <summary>Pasaron los 15 s: si el mouse no volvió a la isla, se esconde otra vez.</summary>
+    private void AlExpirarOcultar(object? sender, EventArgs e)
+    {
+        _ocultarTras?.Stop();
+        if (EstaSobreIsla()) return;
+        _mostrarPorMouse = false;
+        _bloqueoMultimedia = false;
     }
 
     /// <summary>Cambió el volumen o el brillo: la isla se expande un momento con la barra. Si está tapada, no se muestra.</summary>
@@ -396,10 +474,19 @@ public partial class VentanaIsla : Window
             EstadoIsla.AnimateTo(1.0);
             return;
         }
-        if (EstadoIsla.Progress > 0.5)
+        Point p = e.GetPosition(_lienzo);
+        double x = p.X - _offsetX - Constantes.Pad;
+        bool abierta = EstadoIsla.Progress > 0.5;
+
+        // Un clic en el aviso de la pastilla lo cierra.
+        if (!abierta && AlertaAviso.Mix > 0.5 && x >= 0 && x <= _sw && p.Y >= 0 && p.Y <= _sh)
         {
-            Point p = e.GetPosition(_lienzo);
-            double x = p.X - _offsetX - Constantes.Pad;
+            AlertaAviso.Cerrar();
+            return;
+        }
+
+        if (abierta)
+        {
             PanelReproductor.HandleClick(x, p.Y);
 
             // Si es un botón de volumen, sigue subiendo o bajando mientras se mantiene presionado.
@@ -412,6 +499,11 @@ public partial class VentanaIsla : Window
             }
         }
     }
+
+    /// <summary>True si la pastilla puede mostrar un aviso ahora: visible y sin carga ni arranque.</summary>
+    private bool PuedeMostrarAviso() =>
+        !ContenidoReposo.ChargeActive && !EstadoIsla.ArranqueActivo && !EstadoIsla.Minimized && !_cubierta
+        && EstadoIsla.HideT < 0.5;
 
     /// <summary>True si el mouse está encima de la forma de la isla.</summary>
     private bool EstaSobreIsla()

@@ -39,7 +39,7 @@ public sealed class CapaOjos : FrameworkElement
         if (mix <= 0.01) return;
 
         // Los ojos solo se ven con la pastilla ya cerrada: al expandirse, se desvanecen.
-        double rest = Math.Clamp(1 - EstadoIsla.Progress * 20, 0, 1);
+        double rest = Math.Clamp(1 - EstadoIsla.Progress * 20, 0, 1) * (1 - AlertaAviso.Mix);  // el aviso de la pastilla tapa los ojos
         // Oculta como barrita (HideT), los ojos se desvanecen con la pastilla; no quedan flotando sobre el fondo.
         double pastilla = Math.Clamp(1 - EstadoIsla.HideT, 0, 1);
         dc.PushTransform(new TranslateTransform(_offsetX, 0));

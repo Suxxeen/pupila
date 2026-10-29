@@ -64,12 +64,13 @@ El dibujo va así: primero la pastilla negra y, recortado a su forma, el conteni
 
 En reposo, el lienzo se redibuja 15 veces por segundo. Con algo en movimiento, en cada cuadro. Los ojos van en su propia capa (`CapaOjos`), que se redibuja en cada cuadro.
 
-Mouse: al entrar, la isla se expande (salvo que esté escondida como barrita) y el contador de avisos vuelve a cero. Al salir, se cierra 300 ms después si el mouse no está encima. Un clic en la barrita la muestra. Con el panel abierto, el clic va a `PanelReproductor.HandleClick`, y los botones de volumen repiten la tecla mientras se mantienen presionados.
+Mouse: al entrar, la isla se expande (salvo que esté escondida como barrita). Mientras el aviso de la pastilla está visible, el mouse no la despliega, y un clic en el aviso lo cierra. El contador de la campanita vuelve a cero cuando el aviso se oculta. Al salir, se cierra 300 ms después si el mouse no está encima. Un clic en la barrita la muestra. Si está escondida por contenido debajo, el mouse la muestra solo como reloj: 2,5 s sin abrir el multimedia y 15 s después de salir el mouse vuelve a esconderse. Con el panel abierto, el clic va a `PanelReproductor.HandleClick`, y los botones de volumen repiten la tecla mientras se mantienen presionados.
 
 | Archivo | Qué hace |
 |---|---|
 | `VentanaIsla.cs` y `.xaml` | La ventana y el cuadro. Forma, mouse, ocultado y clics. Reparte los eventos de volumen, brillo, avisos y teclas. |
 | `ContenidoReposo.cs` | La fila de reposo: hora, clima, batería o espectro, campanita de avisos y animación de carga. Carga los iconos de `Recursos/iconos/`. |
+| `AlertaAviso.cs` | El aviso que sale en la pastilla al llegar uno: se ensancha lo justo, muestra la app y el título del aviso unos 4,5 s y vuelve a la campanita. Mientras dura, el mouse no despliega la pastilla. |
 | `PanelReproductor.cs` | El panel abierto: portada difuminada, título, progreso, controles y volumen. |
 | `BarraVolumenBrillo.cs` | La barra compacta de volumen o brillo que sale de la isla un momento. |
 | `IndicadorBloqueo.cs` | El aviso "Mayús activado", "Bloq Num desactivado", etc. |
@@ -89,7 +90,7 @@ Cada servicio arranca en `OnStartup` y guarda su último valor. `ServicioVolumen
 | `ServicioVolumen.cs` | Volumen y silencio del altavoz predeterminado, cada 120 ms. Revisa si cambió el altavoz cada 3 s. |
 | `ServicioBrillo.cs` | Brillo de la pantalla interna: evento `WmiMonitorBrightnessEvent` de WMI, con respaldo cada 10 s. |
 | `ServicioTeclas.cs` | Gancho de teclado. Solo mira volumen, Mayús y Bloq Num; ignora todas las teclas inyectadas por programas, como las que manda Pupila. No guarda lo que escribes. |
-| `ServicioAvisos.cs` | Proceso de PowerShell (`avisos.ps1`): cuántos avisos nuevos siguen en el Centro de notificaciones, su identificador y el nombre de la app. No lee el contenido. |
+| `ServicioAvisos.cs` | Proceso de PowerShell (`avisos.ps1`): los avisos nuevos, con su identificador, el nombre de la app y su título. No lee el texto del mensaje. Si el proceso se cierra, Pupila lo vuelve a abrir. |
 | `ServicioClima.cs` | Primero el botón de Widgets de la barra de tareas. Si no está, la ubicación de Windows (con PowerShell, `ubicacion.ps1`) y Open-Meteo. Al arrancar y cada 15 min. Es la única conexión a internet de la app: `api.open-meteo.com`, con latitud y longitud. No usa IP. |
 | `ServicioBateria.cs` | Porcentaje y si está conectada al cargador. Se consulta cada 30 s y cuando Windows avisa que cambió la corriente; la isla lee el último valor guardado. |
 | `DetectorContenido.cs` | Hilo propio que mira la ventana activa (solo lectura, con UI Automation). Solo ve el tipo y la posición de cada control, no su texto. |

@@ -32,7 +32,7 @@ Para el instalador, instala [Inno Setup 6](https://jrsoftware.org/isinfo.php), p
 
 - **Animaciones a 60 cuadros por segundo.** Las animaciones salen del reloj de `Nucleo\CuadroFijo.cs`, para que se vean igual en monitores de 60, 144 o 240 Hz. No agregues animaciones que se salten ese reloj.
 - **Sin registros en disco.** Pupila no escribe archivos de registro ni de diagnóstico. Lo único que escribe en disco son los dos scripts de PowerShell que crea en `%APPDATA%\Pupila`. Si necesitas saber qué pasa, usa el depurador o `Debug.WriteLine` mientras pruebas, y quítalo antes de mandar el cambio.
-- **Privacidad primero.** No se guardan textos escritos, contenido de avisos ni ubicaciones. La única conexión a internet es a Open-Meteo, para el clima, y solo manda latitud y longitud. Lo que se lee y lo que se envía está en la sección «Privacidad» de [README.md](README.md). Si un cambio toca eso, dilo en la descripción del cambio.
+- **Privacidad primero.** No se guardan textos escritos ni ubicaciones. De los avisos solo se lee el identificador, el nombre de la app y el título; el texto del mensaje no se lee. La única conexión a internet es a Open-Meteo, para el clima, y solo manda latitud y longitud. Lo que se lee y lo que se envía está en la sección «Privacidad» de [README.md](README.md). Si un cambio toca eso, dilo en la descripción del cambio.
 - **Todo en español.** Las carpetas, los archivos, las clases, los comentarios y los textos van en español.
 - **Sin dependencias nuevas sin razón fuerte.** Cada paquete hace más pesado el ejecutable.
 - **Mide la versión instalada.** El consumo de CPU y memoria de la versión de desarrollo no es el que tendrá quien instale Pupila. Compila el instalador (ver Publicar) y mide esa versión.

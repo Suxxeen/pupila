@@ -43,6 +43,7 @@ public static class ContenidoReposo
     // Tipografías: Segoe UI Variable Display 16 DemiBold (reloj) y Segoe UI Variable Text 9 (clima).
     static readonly Typeface ClockFace = new(new FontFamily("Segoe UI Variable Display"), FontStyles.Normal, FontWeights.DemiBold, FontStretches.Normal);
     static readonly Typeface SmallFace = new(new FontFamily("Segoe UI Variable Text"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+    static readonly Typeface BadgeFace = new(new FontFamily("Segoe UI Variable Text"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal);
 
     // Caché de textos y de iconos: se rehacen solo cuando cambia el contenido.
     static string _clockKey = "";
@@ -178,7 +179,7 @@ public static class ContenidoReposo
         var clock = ClockFormatted(text);
         double width = clock.Width;
         double cx = sw / 2;
-        double bx = Math.Min(cx + width / 2 + 12, sw - 20);  // la batería nunca sale de la pastilla
+        double bx = BateriaX(sw, width);
 
         // Un píxel arriba: las cifras se ven bajas si se centran por la caja completa de la fuente.
         dc.DrawText(clock, new Point(cx - width / 2, -1 + sh / 2 - clock.Height / 2));
@@ -204,7 +205,7 @@ public static class ContenidoReposo
         {
             double escala = 0.6 + Smooth(Ramp(t, 0.15, 0.5)) - 0.6 * Ramp(t, 1.5, 1.85);
             double angulo = 18 * Math.Sin(t * 2 * Math.PI * 3) * (1 - Ramp(t, 0.45, 1.5));
-            DrawBell(dc, cx - width / 2 - 30, sh / 2, escala, angulo, Math.Clamp(grande, 0, 1));
+            DrawBell(dc, cx - width / 2 - 30, sh / 2, escala, angulo, Math.Clamp(grande, 0, 1), ServicioAvisos.Pendientes);
         }
 
         var status = ServicioBateria.Leer();
@@ -222,10 +223,10 @@ public static class ContenidoReposo
             dc.Pop();
         }
 
-        // Campanita pequeña junto a la batería: vuelve cuando termina la transición.
+        // Campanita junto a la batería: siempre está, con cuántos avisos hay sin ver. Vuelve al terminar la transición.
         double pequena = Math.Clamp(1 - Ramp(t, 0.15, 0.3) + Ramp(t, 1.85, 2.15), 0, 1);
-        if (ServicioAvisos.Pendientes > 0 && pequena > 0.001)
-            DrawBell(dc, bx + 22, sh / 2, 1.0, AnguloTimbre(), pequena);
+        if (pequena > 0.001)
+            DrawBell(dc, bx + 22, sh / 2, 1.0, AnguloTimbre(), pequena, ServicioAvisos.Pendientes);
     }
 
     static double Ramp(double t, double a, double b) => Math.Clamp((t - a) / (b - a), 0, 1);
@@ -258,24 +259,55 @@ public static class ContenidoReposo
     }
 
     /// <summary>
-    /// Campanita blanca con un punto rojo. centroX/centroY es el centro de la caja de 12x12;
-    /// escala, ángulo y opacidad la animan.
+    /// Campanita blanca. Si hay avisos sin ver, lleva un número rojo en la esquina. centroX/centroY es el centro
+    /// de la caja de 12x12; escala, ángulo y opacidad la animan.
     /// </summary>
-    static void DrawBell(DrawingContext dc, double centroX, double centroY, double escala, double angulo, double opacidad)
+    static void DrawBell(DrawingContext dc, double centroX, double centroY, double escala, double angulo, double opacidad, int sinVer)
     {
         dc.PushOpacity(opacidad);
         dc.PushTransform(new TranslateTransform(centroX, centroY));
         dc.PushTransform(new ScaleTransform(escala, escala));
+        // El número crece con la campanita pero no gira, así se lee derecho. Va en la esquina, fuera del domo.
+        if (sinVer > 0)
+            DrawBadge(dc, 7, -7, sinVer);
         dc.PushTransform(new RotateTransform(angulo));
         dc.PushTransform(new TranslateTransform(-6, -6));  // gira alrededor del centro de la campanita
         dc.DrawGeometry(Paleta.White, null, BellGeometry);
-        dc.DrawEllipse(RedDot, null, new Point(11, 1), 2.6, 2.6);
         dc.Pop();
         dc.Pop();
         dc.Pop();
         dc.Pop();
         dc.Pop();
     }
+
+    /// Campanita con su número, para que el aviso de la pastilla la muestre igual que en reposo.
+    public static void DibujarCampanita(DrawingContext dc, double x, double y, int sinVer) => DrawBell(dc, x, y, 1.0, 0, 1.0, sinVer);
+
+    /// Círculo rojo con cuántos avisos hay sin ver. Pasa de 9 a "9+" para que quepa.
+    static void DrawBadge(DrawingContext dc, double x, double y, int sinVer)
+    {
+        const double radio = 6.5;
+        dc.DrawEllipse(RedDot, null, new Point(x, y), radio, radio);
+        var numero = BadgeFormatted(sinVer > 9 ? "9+" : sinVer.ToString(CultureInfo.InvariantCulture));
+        dc.DrawText(numero, new Point(x - numero.Width / 2, y - numero.Height / 2));
+    }
+
+    static string _badgeKey = "";
+    static FormattedText? _badgeText;
+
+    /// Número de la insignia, en caché: solo se rehace cuando cambia el número.
+    static FormattedText BadgeFormatted(string text)
+    {
+        if (_badgeText is null || _badgeKey != text)
+        {
+            _badgeKey = text;
+            _badgeText = Formatted(text, BadgeFace, Pt(6.5), Paleta.White);
+        }
+        return _badgeText;
+    }
+
+    /// Posición horizontal de la batería: a la derecha de la hora, sin salirse de la pastilla.
+    static double BateriaX(double sw, double anchoHora) => Math.Min(sw / 2 + anchoHora / 2 + 12, sw - 20);
 
     // --- dibujo de la carga ----------------------------------------------------
 
@@ -556,7 +588,7 @@ public static class ContenidoReposo
         return _tempText;
     }
 
-    static FormattedText Formatted(string text, Typeface face, double size, Brush brush)
+    internal static FormattedText Formatted(string text, Typeface face, double size, Brush brush)
     {
         return new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, face, size, brush, 1.0);
     }

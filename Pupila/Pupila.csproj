@@ -12,7 +12,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>instalador\pupila.ico</ApplicationIcon>
-    <Version>1.0.2-beta</Version>
+    <Version>1.0.3-beta</Version>
     <!-- Sin compresión: comprimido, el .exe de un solo archivo descomprime todo en memoria al abrirse (~80 MB más de RAM). -->
     <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
   </PropertyGroup>

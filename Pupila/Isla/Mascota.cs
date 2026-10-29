@@ -281,6 +281,15 @@ public static class Mascota
         _eyesMix = 0;
     }
 
+    /// <summary>Al mostrar con el mouse la isla escondida: se ve el reloj directo, sin ojos ni saludo.</summary>
+    public static void MostrarRelojDirecto()
+    {
+        _sleeping = false;
+        _eyesMix = 0;
+        _eyesHoverUntil = 0;
+        _happyUntil = 0;
+    }
+
     /// <summary>Empieza el saludo de arranque: los ojos aparecen fuera de plano, se enfocan y saludan.</summary>
     public static void EmpezarSaludo()
     {
